@@ -1,0 +1,18 @@
+[package]
+name = "ANPR_bind"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+libc = "0.2"
+
+[build-dependencies]
+bindgen = "0.69.4"
+cc = "1.0.100"
+
+[profile.dev]
+opt-level = 1 # Optimize for faster builds during development
+
+[profile.release]
+opt-level = 3 # Optimize for maximum performance

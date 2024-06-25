@@ -60,13 +60,13 @@ fn main() {
         println!("cargo:rustc-link-lib=static=iANPR_vc14_x64");
         println!("cargo:rustc-link-lib=static=iANPRcapture_vc14_x64");
         println!("cargo:rustc-link-lib=static=iANPRinterface_vc14_x64");
-        println!("cargo:rustc-link-lib=opencv_world340"); // Change this to the actual OpenCV library name
+        println!("cargo:rustc-link-lib=static=opencv_world340"); // Change this to the actual OpenCV library name
     } else {
         println!("cargo:rustc-link-search=native=lib/x86");
         println!("cargo:rustc-link-lib=static=iANPR_vc14_x86");
         println!("cargo:rustc-link-lib=static=iANPRcapture_vc14_x86");
         println!("cargo:rustc-link-lib=static=iANPRinterface_vc14_x86");
-        println!("cargo:rustc-link-lib=opencv_world340"); // Change this to the actual OpenCV library name
+        println!("cargo:rustc-link-lib=static=opencv_world340"); // Change this to the actual OpenCV library name
     }
 
     // Print the LIBCLANG_PATH for debugging

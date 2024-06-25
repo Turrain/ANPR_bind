@@ -4,7 +4,7 @@
 #![allow(non_camel_case_types)] // Suppresses warnings for type names that should be in upper camel case
 #![allow(unused_variables)]
 use std::{
-    ffi::{CStr, CString},
+    ffi::{c_double, CStr, CString},
     os::raw::{c_char, c_int, c_void},
     ptr,
 };
@@ -54,15 +54,81 @@ pub struct AnprOptions {
     pub flags: c_int,
     pub custom: *mut c_void,
     pub vers: CString,
-    pub alpha: f64,
-    pub beta: f64,
-    pub gamma: f64,
+    pub alpha: c_double,
+    pub beta: c_double,
+    pub gamma: c_double,
     pub max_threads: c_int,
 }
 
 
 impl AnprOptions {
-    pub fn new(version: &str) -> Self {
+    pub fn with_min_plate_size(mut self, min_plate_size: c_int) -> Self {
+        self.min_plate_size = min_plate_size;
+        self
+    }
+
+    pub fn with_max_plate_size(mut self, max_plate_size: c_int) -> Self {
+        self.max_plate_size = max_plate_size;
+        self
+    }
+
+    pub fn with_detect_mode(mut self, detect_mode: c_int) -> Self {
+        self.detect_mode = detect_mode;
+        self
+    }
+
+    pub fn with_max_text_size(mut self, max_text_size: c_int) -> Self {
+        self.max_text_size = max_text_size;
+        self
+    }
+
+    pub fn with_type_number(mut self, type_number: c_int) -> Self {
+        self.type_number = type_number;
+        self
+    }
+
+    pub fn with_flags(mut self, flags: c_int) -> Self {
+        self.flags = flags;
+        self
+    }
+
+    pub fn with_custom(mut self, custom: *mut c_void) -> Self {
+        self.custom = custom;
+        self
+    }
+
+    pub fn with_vers(mut self, vers: &str) -> Self {
+        self.vers = CString::new(vers).unwrap();
+        self
+    }
+
+    pub fn with_alpha(mut self, alpha: c_double) -> Self {
+        self.alpha = alpha;
+        self
+    }
+
+    pub fn with_beta(mut self, beta: c_double) -> Self {
+        self.beta = beta;
+        self
+    }
+
+    pub fn with_gamma(mut self, gamma: c_double) -> Self {
+        self.gamma = gamma;
+        self
+    }
+
+    pub fn with_max_threads(mut self, max_threads: c_int) -> Self {
+        self.max_threads = max_threads;
+        self
+    }
+
+    pub fn is_full_type(&self, full_types: &[c_int]) -> bool {
+        full_types.contains(&self.type_number)
+    }
+   
+}
+impl Default for AnprOptions {
+    fn default() -> Self {
         Self {
             min_plate_size: 500,
             max_plate_size: 50000,
@@ -71,17 +137,15 @@ impl AnprOptions {
             type_number: 104,
             flags: 0,
             custom: ptr::null_mut(),
-            vers: CString::new(version).unwrap(),
+            vers: CString::new("1.6.0").unwrap(),
             alpha: 90.0,
             beta: 90.0,
             gamma: 90.0,
             max_threads: 1,
         }
     }
-    pub fn is_full_type(&self, full_types: &[c_int]) -> bool {
-        full_types.contains(&self.type_number)
-    }
 }
+
 
 
 pub fn anpr_plate(img: &AnprImage, options: &AnprOptions) -> Result<Vec<String>, String> {

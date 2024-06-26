@@ -244,8 +244,11 @@ impl Default for AnprOptions {
         }
     }
 }
-
-pub fn anpr_video(video_path: Option<String>, type_number: i32) -> Result<(), String> {
+pub type AnprCallback = dyn Fn(Vec<String>) + Send + 'static;
+pub fn anpr_video<F>(video_path: Option<String>, type_number: i32, callback: F) -> Result<(), String>
+where
+    F: Fn(Vec<String>) + Send + 'static,
+{
     let mut frame_capture = match video_path {
         Some(path) => AnprVideoCapture::from_file(&path)?,
         None => AnprVideoCapture::from_camera(0)?,
@@ -255,11 +258,11 @@ pub fn anpr_video(video_path: Option<String>, type_number: i32) -> Result<(), St
         ptr: ptr::null_mut(),
     };
 
- 
     let anpr_options = AnprOptions::default().with_type_number(type_number);
- 
+
     let full_types = [4, 7, 9, 310, 311, 911];
     let is_full_type = anpr_options.is_full_type(&full_types);
+
     loop {
         let mut frame = frame_capture.read_frame()?;
         if frame.ptr.is_null() {
@@ -269,11 +272,12 @@ pub fn anpr_video(video_path: Option<String>, type_number: i32) -> Result<(), St
         let start = Instant::now();
        
         match anpr_plate(&frame, &anpr_options) {
-            Ok(e) => {
-                println!("{:?}",e)
+            Ok(results) => {
+                callback(results);
             },
             Err(e) => {
-                eprintln!("{}",e)
+                callback(vec![e]);
+              //  eprintln!("{}", e);
             }
         };
         let duration = start.elapsed();
@@ -281,9 +285,7 @@ pub fn anpr_video(video_path: Option<String>, type_number: i32) -> Result<(), St
         println!(
             "time: {:.3}; ",
             duration.as_secs_f32(),
-        
         );
-  
     }
 
     Ok(())

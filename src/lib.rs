@@ -159,6 +159,7 @@ pub struct AnprOptions {
     pub gamma: c_double,
     pub max_threads: c_int,
 }
+unsafe impl Send for AnprOptions {}
 
 impl AnprOptions {
     pub fn with_min_plate_size(mut self, min_plate_size: c_int) -> Self {

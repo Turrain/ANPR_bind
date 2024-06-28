@@ -245,9 +245,10 @@ impl Default for AnprOptions {
     }
 }
 pub type AnprCallback = dyn Fn(Vec<String>) + Send + 'static;
-pub fn anpr_video<F>(video_path: Option<String>, type_number: i32, callback: F) -> Result<(), String>
+pub fn anpr_video<F,H>(video_path: Option<String>, type_number: i32, callback: F, conditionFn: H) -> Result<(), String>
 where
     F: Fn(Vec<String>) + Send + 'static,
+    H: Fn(usize) -> bool
 {
     let mut frame_capture = match video_path {
         Some(path) => AnprVideoCapture::from_file(&path)?,
@@ -262,8 +263,11 @@ where
 
     let full_types = [4, 7, 9, 310, 311, 911];
     let is_full_type = anpr_options.is_full_type(&full_types);
-
+    let mut frame_number = 0;
     loop {
+        println!("Frame: {}", frame_number);
+        if !conditionFn(frame_number) { frame_number +=1 ; continue; }
+
         let mut frame = frame_capture.read_frame()?;
         if frame.ptr.is_null() {
             break;
@@ -286,6 +290,7 @@ where
             "time: {:.3}; ",
             duration.as_secs_f32(),
         );
+        frame_number +=1 ;
     }
 
     Ok(())
